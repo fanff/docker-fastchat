@@ -94,6 +94,32 @@ make run-X-Z
 
 Example: `make run-latest-cuda12`.
 
+### build  controller only
+
+```sh
+docker build -f dockerfiles/controler.Dockerfile -t w --target controlerimg . 
+
+docker run -it --rm w python -m fastchat.serve.controller  --host 0.0.0.0 --port 8021
+
+```
+
+
+### build web ui
+```sh
+
+docker build -f dockerfiles/controler.Dockerfile -t webui --target webui .
+
+
+docker run -it --rm webui python -m fastchat.serve.gradio_web_server --host 0.0.0.0 --port 3923 
+
+```
+
+
+python -m fastchat.serve.cli --model-path lmsys/fastchat-t5-3b-v1.0
+
+
+
+
 ---
 
 [img-docker]: https://img.shields.io/docker/pulls/ivangabriele/docker-fastchat?style=for-the-badge

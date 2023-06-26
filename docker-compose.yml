@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  webui:
+    build:
+      dockerfile: dockerfiles/controler.Dockerfile
+      context: .
+      target: webui
+    image: webui
+
+    entrypoint: python -m fastchat.serve.gradio_web_server --host 0.0.0.0 --port 3923 --controller-url http://controler:8021 --add-chatgpt
+
+    ports:
+        - 3923:3923
+    environment:
+      - ${OPENAI_API_KEY}:${OPENAI_API_KEY}
+    
+  controler:
+    build:
+      dockerfile: dockerfiles/controler.Dockerfile
+      context: .
+      target: controlerimg
+    image: controlerimg
+
+    entrypoint: python -m fastchat.serve.controller --host 0.0.0.0 --port ${CONTROLER_PORT}
+
+    ports:
+      - ${CONTROLER_PORT}:${CONTROLER_PORT}
+
+  vicuna:
+    build:
+      dockerfile: dockerfiles/controler.Dockerfile
+      context: .
+      target: vicuna7b
+    image: vicuna7b
+
+    entrypoint: python -m fastchat.serve.model_worker --host 0.0.0.0 --port 31000 --model-path lmsys/vicuna-7b-v1.3 --controller http://controler:${CONTROLER_PORT} --worker http://vicuna:31000
+
+    
+#CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path lmsys/vicuna-7b-v1.3 --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
+
+# ENTRYPOINT ["python3 -m fastchat.serve.cli --model-path /path/to/model/weights"]
